@@ -1,87 +1,85 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
-import subprocess
-import os
-import base64
-import pickle
+import shap
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.ensemble import RandomForestRegressor
 
-# Molecular descriptor calculator
-def desc_calc():
-    # Performs the descriptor calculation
-    bashCommand = "java -Xms2G -Xmx2G -Djava.awt.headless=true -jar ./PaDEL-Descriptor/PaDEL-Descriptor.jar -removesalt -standardizenitro -fingerprints -descriptortypes ./PaDEL-Descriptor/PubchemFingerprinter.xml -dir ./ -file descriptors_output.csv"
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-    os.remove('molecule.smi')
-
-# File download
-def filedownload(df):
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  # strings <-> bytes conversions
-    href = f'<a href="data:file/csv;base64,{b64}" download="prediction.csv">Download Predictions</a>'
-    return href
-
-# Model building
-def build_model(input_data):
-    # Reads in saved regression model
-    load_model = pickle.load(open('acetylcholinesterase_model.pkl', 'rb'))
-    # Apply model to make predictions
-    prediction = load_model.predict(input_data)
-    st.header('**Prediction output**')
-    prediction_output = pd.Series(prediction, name='pIC50')
-    molecule_name = pd.Series(load_data[1], name='molecule_name')
-    df = pd.concat([molecule_name, prediction_output], axis=1)
-    st.write(df)
-    st.markdown(filedownload(df), unsafe_allow_html=True)
-
-# Logo image
-image = Image.open('logo.png')
-
-st.image(image, use_column_width=True)
-
-# Page title
-st.markdown("""
-# Bioactivity Prediction App (Acetylcholinesterase)
-
-This app allows you to predict the bioactivity towards inhibting the `Acetylcholinesterase` enzyme. `Acetylcholinesterase` is a drug target for Alzheimer's disease.
-
-**Credits**
-- App built in `Python` + `Streamlit` by [Chanin Nantasenamat](https://medium.com/@chanin.nantasenamat) (aka [Data Professor](http://youtube.com/dataprofessor))
-- Descriptor calculated using [PaDEL-Descriptor](http://www.yapcwsoft.com/dd/padeldescriptor/) [[Read the Paper]](https://doi.org/10.1002/jcc.21707).
----
+st.write("""
+# Boston House Price Prediction App
+This app predicts the **Boston House Price**!
 """)
+st.write('---')
+
+# Loads the Boston House Price Dataset
+boston = datasets.load_boston()
+X = pd.DataFrame(boston.data, columns=boston.feature_names)
+Y = pd.DataFrame(boston.target, columns=["MEDV"])
 
 # Sidebar
-with st.sidebar.header('1. Upload your CSV data'):
-    uploaded_file = st.sidebar.file_uploader("Upload your input file", type=['txt'])
-    st.sidebar.markdown("""
-[Example input file](https://raw.githubusercontent.com/dataprofessor/bioactivity-prediction-app/main/example_acetylcholinesterase.txt)
-""")
+# Header of Specify Input Parameters
+st.sidebar.header('Specify Input Parameters')
 
-if st.sidebar.button('Predict'):
-    load_data = pd.read_table(uploaded_file, sep=' ', header=None)
-    load_data.to_csv('molecule.smi', sep = '\t', header = False, index = False)
+def user_input_features():
+    CRIM = st.sidebar.slider('CRIM', X.CRIM.min(), X.CRIM.max(), X.CRIM.mean())
+    ZN = st.sidebar.slider('ZN', X.ZN.min(), X.ZN.max(), X.ZN.mean())
+    INDUS = st.sidebar.slider('INDUS', X.INDUS.min(), X.INDUS.max(), X.INDUS.mean())
+    CHAS = st.sidebar.slider('CHAS', X.CHAS.min(), X.CHAS.max(), X.CHAS.mean())
+    NOX = st.sidebar.slider('NOX', X.NOX.min(), X.NOX.max(), X.NOX.mean())
+    RM = st.sidebar.slider('RM', X.RM.min(), X.RM.max(), X.RM.mean())
+    AGE = st.sidebar.slider('AGE', X.AGE.min(), X.AGE.max(), X.AGE.mean())
+    DIS = st.sidebar.slider('DIS', X.DIS.min(), X.DIS.max(), X.DIS.mean())
+    RAD = st.sidebar.slider('RAD', X.RAD.min(), X.RAD.max(), X.RAD.mean())
+    TAX = st.sidebar.slider('TAX', X.TAX.min(), X.TAX.max(), X.TAX.mean())
+    PTRATIO = st.sidebar.slider('PTRATIO', X.PTRATIO.min(), X.PTRATIO.max(), X.PTRATIO.mean())
+    B = st.sidebar.slider('B', X.B.min(), X.B.max(), X.B.mean())
+    LSTAT = st.sidebar.slider('LSTAT', X.LSTAT.min(), X.LSTAT.max(), X.LSTAT.mean())
+    data = {'CRIM': CRIM,
+            'ZN': ZN,
+            'INDUS': INDUS,
+            'CHAS': CHAS,
+            'NOX': NOX,
+            'RM': RM,
+            'AGE': AGE,
+            'DIS': DIS,
+            'RAD': RAD,
+            'TAX': TAX,
+            'PTRATIO': PTRATIO,
+            'B': B,
+            'LSTAT': LSTAT}
+    features = pd.DataFrame(data, index=[0])
+    return features
 
-    st.header('**Original input data**')
-    st.write(load_data)
+df = user_input_features()
 
-    with st.spinner("Calculating descriptors..."):
-        desc_calc()
+# Main Panel
 
-    # Read in calculated descriptors and display the dataframe
-    st.header('**Calculated molecular descriptors**')
-    desc = pd.read_csv('descriptors_output.csv')
-    st.write(desc)
-    st.write(desc.shape)
+# Print specified input parameters
+st.header('Specified Input parameters')
+st.write(df)
+st.write('---')
 
-    # Read descriptor list used in previously built model
-    st.header('**Subset of descriptors from previously built models**')
-    Xlist = list(pd.read_csv('descriptor_list.csv').columns)
-    desc_subset = desc[Xlist]
-    st.write(desc_subset)
-    st.write(desc_subset.shape)
+# Build Regression Model
+model = RandomForestRegressor()
+model.fit(X, Y)
+# Apply Model to Make Prediction
+prediction = model.predict(df)
 
-    # Apply trained model to make prediction on query compounds
-    build_model(desc_subset)
-else:
-    st.info('Upload input data in the sidebar to start!')
+st.header('Prediction of MEDV')
+st.write(prediction)
+st.write('---')
+
+# Explaining the model's predictions using SHAP values
+# https://github.com/slundberg/shap
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X)
+
+st.header('Feature Importance')
+plt.title('Feature importance based on SHAP values')
+shap.summary_plot(shap_values, X)
+st.pyplot(bbox_inches='tight')
+st.write('---')
+
+plt.title('Feature importance based on SHAP values (Bar)')
+shap.summary_plot(shap_values, X, plot_type="bar")
+st.pyplot(bbox_inches='tight')
