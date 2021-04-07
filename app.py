@@ -9,6 +9,7 @@ import base64
 st.markdown('''
 # **BioInformatics-EDA**
 This is **EDA App** used for visualizating medical data.
+Download sample Datasets below: 
 ---
 ''')
 
@@ -41,12 +42,10 @@ def download_link(object_to_download, download_filename, download_link_text):
     return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
 
-# Examples
-df = pd.DataFrame({'x': list(range(10)), 'y': list(range(10))})
-st.write(df)
 
-if st.button('Download Dataframe as CSV'):
-    tmp_download_link = download_link(df, 'https://github.com/rajratnapatil9/Datasets/blob/master/heart.csv', 'Heart Deasease Data')
+
+if st.button('Heart Deasease Data'):
+    tmp_download_link = download_link(https://github.com/rajratnapatil9/Datasets/blob/master/heart.csv, 'heart.csv', 'Heart Deasease Data')
     st.markdown(tmp_download_link, unsafe_allow_html=True)
 
 
