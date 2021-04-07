@@ -41,11 +41,11 @@ def download_link(object_to_download, download_filename, download_link_text):
 
     return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
-
-
+hrt = pd.DataFrame(https://github.com/rajratnapatil9/Datasets/blob/master/heart.csv)
+st.write(hrt)
 
 if st.button('Heart Deasease Data'):
-    tmp_download_link = download_link(https://github.com/rajratnapatil9/Datasets/blob/master/heart.csv, 'heart.csv', 'Heart Deasease Data')
+    tmp_download_link = download_link(hrt, 'heart.csv', 'Heart Deasease Data')
     st.markdown(tmp_download_link, unsafe_allow_html=True)
 
 
