@@ -41,7 +41,7 @@ def download_link(object_to_download, download_filename, download_link_text):
 
     return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
-hrt = pd.read_csv("https://github.com/rajratnapatil9/Datasets/blob/master/heart.csv")
+hrt = pd.read_csv("https://www.kaggle.com/rashikrahmanpritom/heart-attack-analysis-prediction-dataset?select=heart.csv")
 st.write(hrt)
 
 if st.button('Heart Deasease Data'):
