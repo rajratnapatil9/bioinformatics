@@ -7,7 +7,7 @@ from streamlit_pandas_profiling import st_profile_report
 # Web App Title
 st.markdown('''
 # **BioInformatics-EDA**
-This is **EDA App** used for visualizating medicl data.
+This is **EDA App** used for visualizating medical data.
 ---
 ''')
 
@@ -15,7 +15,7 @@ This is **EDA App** used for visualizating medicl data.
 with st.sidebar.header('1. Upload your CSV data'):
     uploaded_file = st.sidebar.file_uploader("Upload your input CSV file", type=["csv"])
     st.sidebar.markdown("""
-[Example CSV input file](https://raw.githubusercontent.com/dataprofessor/data/master/delaney_solubility_with_descriptors.csv)
+[Example CSV input file](https://github.com/rajratnapatil9/Datasets/blob/master/heart.csv)
 """)
 
 # Pandas Profiling Report
